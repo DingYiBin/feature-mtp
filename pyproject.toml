@@ -1,0 +1,15 @@
+[project]
+name = "compress"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy==1.26.4",
+    "packaging>=26.0",
+    "pybind11>=3.0.3",
+    "torch==2.10.0",
+    "torchaudio==2.10.0",
+    "torchvision==0.25.0",
+    "wheel>=0.46.3",
+]
