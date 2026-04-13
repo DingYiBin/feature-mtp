@@ -78,7 +78,7 @@ except ImportError:
 stimer = StragglerDetector()
 
 from lstm.training import pretrain
-from lstm.lstm_model import LSTMDecodeModel
+from lstm.lstm_model import LSTMDecodeModel, EnoughModel
 
 def model_provider(pre_process=True, post_process=True) -> Union[GPTModel]:
     """Builds the model.
@@ -160,8 +160,8 @@ def model_provider(pre_process=True, post_process=True) -> Union[GPTModel]:
     # print(f"{args.padded_vocab_size=}")
     # print(f"{args.extra_vocab_size=}")
     model_cls = OnlyMTPGPTModel if getattr(args, 'train_mtp_only', False) else GPTModel
-    model_cls_list = [GPTModel, LSTMDecodeModel]
-    model_cls = model_cls_list[getattr(args, 'train_model_mode', 0)]
+    model_cls_list = [GPTModel, LSTMDecodeModel, EnoughModel]
+    model_cls = model_cls_list[args.train_model_mode]
     with build_model_context(**build_model_context_args):
         model = model_cls(
             config=config,
@@ -250,7 +250,7 @@ def loss_func(
 
     if has_nvidia_modelopt and modelopt_args_enabled(args):  # [ModelOpt]
         return loss_func_modelopt(loss_mask, output_tensor, model=model)
-    if getattr(args, 'train_model_mode', 0) in [1]:
+    if args.train_model_mode in [1, 2]:
         loss_mask_list = [loss_mask]
         for i in range(NUM_PREDICTION_TOKENS_FOCUSED - 1):
             loss_mask = torch.roll(loss_mask, shifts=-1, dims=-1)

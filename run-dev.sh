@@ -26,7 +26,7 @@ rm -fr /public/workspace/dyb/experiments/dev
 # export NUM_TRANSFORMER_BLOCK_ONE_MTP_LAYER=2
 bash lstm/train.sh \
     ${EXPERIMENT_PATH} \
-    1 \
+    2 \
     2 \
     /workspace-dyb/converted_dataset/shareAI/ShareGPT-Chinese-English-90k/sharegpt_jsonl/processed_data_text_document \
     64 \

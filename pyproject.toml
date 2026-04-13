@@ -8,6 +8,7 @@ dependencies = [
     "numpy==1.26.4",
     "packaging>=26.0",
     "pybind11>=3.0.3",
+    "tensorboard>=2.20.0",
     "torch==2.10.0",
     "torchaudio==2.10.0",
     "torchvision==0.25.0",

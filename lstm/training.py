@@ -85,7 +85,6 @@ from megatron.core.optimizer_param_scheduler import OptimizerParamScheduler
 from megatron.core.transformer.moe import upcycling_utils
 from megatron.core.transformer.moe.moe_utils import track_moe_metrics
 
-# if os.environ.get("TRAIN_MODEL_MODE", "0") == "0":
 from megatron.core.transformer.multi_token_prediction import MTPLossLoggingHelper
 # else:
 #     from gpt3.only_mtp_gptmodel import MTPLossLoggingHelper
@@ -1099,12 +1098,7 @@ def setup_model_and_optimizer(
             kwargs[f.name] = getattr(args, f.name)
     config = OptimizerConfig(**kwargs)
     config.timers = timers
-    if getattr(args, 'train_model_mode', 0) == 1 and args.mtp_num_layers is not None:
-        for item in unwrapped_model:
-            for param in item.parameters():
-                param.requires_grad = False
-            for param in item.mtp.parameters():
-                param.requires_grad = True
+
     optimizer = get_megatron_optimizer(
         config,
         model,
@@ -1551,7 +1545,7 @@ def training_log(
         MTPLossLoggingHelper.track_mtp_metrics(
             mtp_loss_scale, iteration, writer, wandb_writer, total_loss_dict
         )
-    if os.environ.get("TRAIN_MODEL_MODE", "0") == "1":
+    if args.train_model_mode in [1, 2]:
         mtp_loss_scale = 1 / get_num_microbatches()
         EnoughLossLoggingHelper.track_metrics(
             mtp_loss_scale, iteration, writer, wandb_writer, total_loss_dict
@@ -1953,10 +1947,7 @@ def train(
     write_args_to_tensorboard()
     # Turn on training mode which enables dropout.
     for model_module in model:
-        if getattr(args, 'train_model_mode', 0) == 1 and args.mtp_num_layers is not None:
-            model_module.module.module.mtp.train()
-        else: 
-            model_module.train()
+        model_module.train()
 
     # Tracking loss.
     total_loss_dict = {}

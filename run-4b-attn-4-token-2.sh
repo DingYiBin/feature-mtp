@@ -11,7 +11,7 @@ echo HOST_GPU_NUM=$HOST_GPU_NUM
 EXPERIMENTS_DIR=/public/workspace/dyb/experiments
 # export ADD_E_PROJ=0
 # experiment
-EXPERIMENT_NAME=pretrain-qwen3-4b-lstm-4-tokens-2
+EXPERIMENT_NAME=pretrain-qwen3-4b-attn-4-tokens-2
 mkdir -p /public/workspace/dyb/compress/logs/$EXPERIMENT_NAME
 LOGS_FILE=/public/workspace/dyb/compress/logs/$EXPERIMENT_NAME/log_$(date +%Y-%m%d-%H%M-%S)_${NODE_RANK}_${HOST_NUM}.log
 echo $LOGS_FILE
@@ -25,7 +25,7 @@ EXPERIMENT_PATH=$EXPERIMENTS_DIR/$EXPERIMENT_NAME
 
 bash lstm/train.sh \
     ${EXPERIMENT_PATH} \
-    1 \
+    2 \
     4 \
     /workspace-dyb/converted_dataset/all-0122 \
     16384 \

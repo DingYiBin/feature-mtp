@@ -27,7 +27,7 @@ NUM_NODES=$HOST_NUM
 WORLD_SIZE=$(($GPUS_PER_NODE*$NUM_NODES))
 
 EXPERIMENT_PATH=$1
-export TRAIN_MODEL_MODE=$2
+TRAIN_MODEL_MODE=$2
 NUM_MTP_LAYERS=$3
 DATA_PATH=$4 #<Specify path and file prefix>_text_document
 NUM_TRAIN_ITERATIONS=$5
@@ -92,12 +92,18 @@ GPT_MODEL_ARGS+=(
 
 
 MTP_NUM_LAYERS=$NUM_MTP_LAYERS
-if [ $TRAIN_MODEL_MODE = 1 ]; then
-    # MTP_NUM_LAYERS=1
-    export NUM_PREDICTION_TOKENS=8
-    export NUM_PREDICTION_TOKENS_FOCUSED=4
-    # GLOBAL_BATCH_SIZE=1024
-fi
+# if [ $TRAIN_MODEL_MODE = 1 ]; then
+#     # MTP_NUM_LAYERS=1
+#     export NUM_PREDICTION_TOKENS=4
+#     export NUM_PREDICTION_TOKENS_FOCUSED=2
+#     # GLOBAL_BATCH_SIZE=1024
+# fi
+# if [ $TRAIN_MODEL_MODE = 2 ]; then
+#     # MTP_NUM_LAYERS=1
+#     export NUM_PREDICTION_TOKENS=4
+#     export NUM_PREDICTION_TOKENS_FOCUSED=2
+#     # GLOBAL_BATCH_SIZE=1024
+# fi
 # GLOBAL_BATCH_SIZE=$((16*$NUM_NODES))
 GLOBAL_BATCH_SIZE=1024
 MICRO_BATCH_SIZE=2
@@ -113,6 +119,15 @@ TOEKENIZER_MODEL=/public/llm_models/Qwen/Qwen3-30B-A3B-Instruct-2507
 NUM_WARMUP_ITERATIONS=$((NUM_TRAIN_ITERATIONS/16))
 NUM_DECAY_ITERATIONS=$((NUM_TRAIN_ITERATIONS/2))
 
+MAX_LR=1.0e-4
+MIN_LR=1.0e-5
+
+# if [ $TRAIN_MODEL_MODE = 1 ]; then
+#     # MAX_LR=1.0e-2
+#     # MIN_LR=1.0e-3
+# fi
+
+
 TRAINING_ARGS=(
     --weight-decay 0.1 
     --adam-beta1 0.9 
@@ -121,24 +136,22 @@ TRAINING_ARGS=(
     --clip-grad 1.0 
     --bf16
     --seq-length 4096
-    --lr 1.0e-4 
+    --lr $MAX_LR
     --lr-decay-style cosine 
-    --min-lr 1.0e-5
+    --min-lr $MIN_LR
     --lr-decay-iters ${NUM_DECAY_ITERATIONS}
     --lr-warmup-iters ${NUM_WARMUP_ITERATIONS}
     --train-iters $NUM_TRAIN_ITERATIONS
+    --train-model-mode $TRAIN_MODEL_MODE
+    --convert-checkpoint
 )
 
-
-if [ $TRAIN_MODEL_MODE = 1 ]; then
-    TRAINING_ARGS+=(
-        --train-model-mode 1
-        --convert-checkpoint
-        # --main-model-checkpoint /public/converted-ckpt/Qwen3-4B-Instruct-2507-tp2/release
-        # --main-model-checkpoint-dtype torch
-    )
-fi
-
+# if [ $TRAIN_MODEL_MODE = 1 ]; then
+#     TRAINING_ARGS+=(
+#         --main-model-checkpoint /public/converted-ckpt/Qwen3-4B-Instruct-2507-tp2/release
+#         --main-model-checkpoint-dtype torch
+#     )
+# fi
 
 DATA_ARGS=(
     --data-path $DATA_PATH 
