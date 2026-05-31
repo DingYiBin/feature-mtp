@@ -8,28 +8,28 @@ export NODE_RANK=0
 export HOST_NUM=1
 export HOST_GPU_NUM=4
 export CUDA_VISIBLE_DEVICES=0,1,2,3
-LOGS_FILE=/public/workspace/dyb/compress/logs/dev.log
+LOGS_FILE=/public/workspace/dyb/compress/logs/one.log
 echo $LOGS_FILE
 
 EXPERIMENTS_DIR=/public/workspace/dyb/experiments
 
 # experiment
-EXPERIMENT_NAME=dev
+EXPERIMENT_NAME=one
 export MODEL_FINETUNED_TYPE=i
 export NUM_TOKENS_LOOK_BACK=1
 export NUM_PREDICTION_TOKENS_FOCUSED=4
 
 EXPERIMENT_PATH=$EXPERIMENTS_DIR/$EXPERIMENT_NAME
 
-rm -fr /public/workspace/dyb/experiments/dev
+rm -fr /public/workspace/dyb/experiments/one
 
 # export NUM_TRANSFORMER_BLOCK_ONE_MTP_LAYER=2
 bash lstm/train.sh \
     ${EXPERIMENT_PATH} \
     4 \
     2 \
-    /workspace-dyb/converted_dataset/shareAI/ShareGPT-Chinese-English-90k/sharegpt_jsonl/processed_data_text_document \
-    64 \
-    4 \
+    /workspace-dyb/converted_dataset/all-0122 \
+    16384 \
+    2048 \
     0 \
     &> $LOGS_FILE

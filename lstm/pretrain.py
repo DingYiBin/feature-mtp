@@ -78,7 +78,8 @@ except ImportError:
 stimer = StragglerDetector()
 
 from lstm.training import pretrain
-from lstm.lstm_model import LSTMDecodeModel, EnoughModel
+from lstm.lstm_model import LSTMDecodeModel, EnoughModel, ProjEnoughModel
+from lstm.only_model import OnlyGPTModel
 
 def model_provider(pre_process=True, post_process=True) -> Union[GPTModel]:
     """Builds the model.
@@ -160,7 +161,7 @@ def model_provider(pre_process=True, post_process=True) -> Union[GPTModel]:
     # print(f"{args.padded_vocab_size=}")
     # print(f"{args.extra_vocab_size=}")
     model_cls = OnlyMTPGPTModel if getattr(args, 'train_mtp_only', False) else GPTModel
-    model_cls_list = [GPTModel, LSTMDecodeModel, EnoughModel]
+    model_cls_list = [GPTModel, LSTMDecodeModel, EnoughModel, ProjEnoughModel, OnlyGPTModel]
     model_cls = model_cls_list[args.train_model_mode]
     with build_model_context(**build_model_context_args):
         model = model_cls(
@@ -250,12 +251,24 @@ def loss_func(
 
     if has_nvidia_modelopt and modelopt_args_enabled(args):  # [ModelOpt]
         return loss_func_modelopt(loss_mask, output_tensor, model=model)
-    if args.train_model_mode in [1, 2]:
-        loss_mask_list = [loss_mask]
+    if args.train_model_mode in [1, 2, 3]:
+        loss_mask_list = [loss_mask * 1.0]
+        pos_loss_scale = 1.0 
         for i in range(NUM_PREDICTION_TOKENS_FOCUSED - 1):
+            pos_loss_scale *= args.pos_loss_scale
             loss_mask = torch.roll(loss_mask, shifts=-1, dims=-1)
             loss_mask.select(-1, -1).fill_(0)
-            loss_mask_list.append(loss_mask)
+            loss_mask_list.append(loss_mask * pos_loss_scale)
+        # print(f"{loss_mask.shape=}\n", end="")
+        loss_mask = torch.stack(loss_mask_list, dim=-1)
+    elif args.train_model_mode in [4]:
+        loss_mask_list = [loss_mask * 1.0]
+        pos_loss_scale = 1.0 
+        for i in range(args.mtp_num_layers - 1):
+            pos_loss_scale *= args.pos_loss_scale
+            loss_mask = torch.roll(loss_mask, shifts=-1, dims=-1)
+            loss_mask.select(-1, -1).fill_(0)
+            loss_mask_list.append(loss_mask * pos_loss_scale)
         # print(f"{loss_mask.shape=}\n", end="")
         loss_mask = torch.stack(loss_mask_list, dim=-1)
         # print(f"{output_tensor.shape=} {loss_mask.shape=}\n", end="", flush=True)
@@ -422,9 +435,14 @@ def add_extra_args(parser):
         '--train-model-mode',
         type=int,
         default=0,
-        choices=[0, 1, 2, 4],
+        choices=[0, 1, 2, 3, 4],
     )
 
+    group.add_argument(
+        '--pos-loss-scale',
+        type=float,
+        default=1.0,
+    )
 
     group.add_argument(
         '--main-model-checkpoint',

@@ -1545,7 +1545,7 @@ def training_log(
         MTPLossLoggingHelper.track_mtp_metrics(
             mtp_loss_scale, iteration, writer, wandb_writer, total_loss_dict
         )
-    if args.train_model_mode in [1, 2]:
+    if args.train_model_mode in [1, 2, 3, 4]:
         mtp_loss_scale = 1 / get_num_microbatches()
         EnoughLossLoggingHelper.track_metrics(
             mtp_loss_scale, iteration, writer, wandb_writer, total_loss_dict
