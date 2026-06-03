@@ -59,7 +59,7 @@ lm loss: 1.075361E+00 | mtp_1 loss: 1.464631E+00 | mtp_2 loss: 1.522981E+00 | mt
 
 lm loss: 6.860194E-01 | mtp_1 loss: 9.684212E-01 | mtp_2 loss: 1.020181E+00 | mtp_3 loss: 1.040076E+00 | mtp_4 loss: 1.055723E+00 | mtp_5 loss: 1.066478E+00 | mtp_6 loss: 1.069652E+00 | mtp_7 loss: 1.073924E+00 
 
-可以注意到，mtp 的几个 loss 随 position 上升，但是差较小，远小于 lm loss 和 mtp1 loss 的差。这是否意味着，如果预测的下一个 token 的结构和后续的 mtp 层保持一致，就可以得到一个逐 position 的 loss 差异更小的解码模块：
+可以注意到，mtp 的几个 loss 随 position 上升，但是差较小，远小于 lm loss 和 mtp1 loss 的差。这是否意味着，如果预测的下一个 token 的结构和后续的 mtp 层保持一致，就可能可以得到一个逐 position 的 loss 差异更小的解码模块：
 
 ![fmtp0](figure/fmtp0.png)
 
@@ -70,9 +70,9 @@ lm loss: 6.860194E-01 | mtp_1 loss: 9.684212E-01 | mtp_2 loss: 1.020181E+00 | mt
 总之，我选择了 mtp 层共用一个和 main model 不同的 embedding。
 
 
-但是，这个比较可能并不合理：
+However, it is easy to notice that this compare is unfair：
 1. fmtp 的 lm loss 是 8 个 position 上的 loss 的均值。
-2. original mtp 的 loss，lm loss(对应 fmtp 的 pos 0 的 loss)，系数为1，mtp scale 默认为 0.1，因此每层的系数为 $1/70$
+2. original mtp 的 loss，lm loss(对应 fmtp 的 pos 0 的 loss)，mtp scale 默认为 0.1，因此每层的系数为 $1/70$
 
 因此，我们还需要两个实验：
 1. fmtp 的 lm loss 为 8 个 position 的 loss 和。
@@ -93,7 +93,7 @@ lm loss: 6.860194E-01 | mtp_1 loss: 9.684212E-01 | mtp_2 loss: 1.020181E+00 | mt
 
 ### some other problems
 
-1. scaling law：到目前为止的 scaling law 其实讨论的是 next-1-token model 的 loss 和规模、数据量的关系。那么，next-n-tokens model 的 scaling law 是否会有改变？
+1. scaling law：到目前为止的 scaling law 其实讨论的是 next-1-token model 的 loss 和规模、数据量的关系。那么，next-n-tokens model 的 scaling law 是否会有改变？对于一个规模的模型，训练时同时拟合多少个token，可以不损害 model 0 的能力？
 2. cost: 没有理由相信，n-tokens model 可以在同规模下达到 next-1-token model 的能力。那么当达到相近能力后，next-n-tokens model 是否真的能在推理上比有 mtp 支持的 1-tokens model 有更低的成本？
 
 ## something useless
