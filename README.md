@@ -68,7 +68,7 @@ lm loss: 1.075361E+00 | mtp_1 loss: 1.464631E+00 | mtp_2 loss: 1.522981E+00 | mt
 
 lm loss: 6.860194E-01 | mtp_1 loss: 9.684212E-01 | mtp_2 loss: 1.020181E+00 | mtp_3 loss: 1.040076E+00 | mtp_4 loss: 1.055723E+00 | mtp_5 loss: 1.066478E+00 | mtp_6 loss: 1.069652E+00 | mtp_7 loss: 1.073924E+00 
 
-可以注意到，mtp 的几个 loss 随 position 上升，但是差较小，远小于 lm loss 和 mtp1 loss 的差。这是否意味着，如果预测的下一个 token 的结构和后续的 mtp 层保持一致，就可以得到一个逐 position 的 loss 更小的解码模块：
+可以注意到，mtp 的几个 loss 随 position 上升，但是差较小，远小于 lm loss 和 mtp1 loss 的差。这是否意味着，如果预测的下一个 token 的结构和后续的 mtp 层保持一致，就可以得到一个逐 position 的 loss 差异更小的解码模块：
 
 ![fmtp0](figure/fmtp0.png)
 
@@ -86,4 +86,6 @@ lm loss: 6.860194E-01 | mtp_1 loss: 9.684212E-01 | mtp_2 loss: 1.020181E+00 | mt
 因此，我们或许还需要两个实验：
 1. fmtp 的 lm loss 为 8 个 position 的 loss 和。
 2. original mtp 设置 mtp scale 为 7
+
+当然，original mtp 设置 mtp scale 为 7 后，lm loss 和 mtp 0 loss 的差异仍大于 fmtp 的差值，也可以证明 fmtp 可能确实可以支持得到一个能同时预测接下来 m 个 token 的模型。
 ## something useless

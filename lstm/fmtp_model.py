@@ -80,7 +80,7 @@ try:
 except ImportError:
     HAVE_TE = False
 
-class OnlyMultiTokenPredictionLayer(MultiTokenPredictionLayer):
+class FMTPMultiTokenPredictionLayer(MultiTokenPredictionLayer):
     def _get_embeddings(
         self,
         input_ids: torch.Tensor,
@@ -113,7 +113,7 @@ class OnlyMultiTokenPredictionLayer(MultiTokenPredictionLayer):
 
         return input_ids, position_ids, decoder_input, hidden_states
 
-class OnlyMultiTokenPredictionBlock(MultiTokenPredictionBlock):
+class FMTPMultiTokenPredictionBlock(MultiTokenPredictionBlock):
     def __init__(
         self,
         config: TransformerConfig,
@@ -150,7 +150,7 @@ class OnlyMultiTokenPredictionBlock(MultiTokenPredictionBlock):
 
     def _build_layers(self, model_comm_pgs):
         def build_layer(layer_spec, layer_number):
-            layer_spec.module = OnlyMultiTokenPredictionLayer
+            layer_spec.module = FMTPMultiTokenPredictionLayer
             return build_module(
                 layer_spec,
                 config=self.config,
@@ -225,7 +225,7 @@ class OnlyMultiTokenPredictionBlock(MultiTokenPredictionBlock):
         return hidden_states
 
 
-class OnlyGPTModel(GPTModel):
+class FMTPGPTModel(GPTModel):
     """GPT Transformer language model.
 
     Args:
@@ -380,7 +380,7 @@ class OnlyGPTModel(GPTModel):
         )
 
         if self.mtp_process:
-            self.mtp = OnlyMultiTokenPredictionBlock(
+            self.mtp = FMTPMultiTokenPredictionBlock(
                 config=self.config,
                 spec=self.mtp_block_spec,
                 vocab_size=self.vocab_size,

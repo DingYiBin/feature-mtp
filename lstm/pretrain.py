@@ -79,7 +79,7 @@ stimer = StragglerDetector()
 
 from lstm.training import pretrain
 from lstm.lstm_model import LSTMDecodeModel, EnoughModel, ProjEnoughModel
-from lstm.only_model import OnlyGPTModel
+from lstm.fmtp_model import FMTPGPTModel
 
 def model_provider(pre_process=True, post_process=True) -> Union[GPTModel]:
     """Builds the model.
@@ -161,7 +161,7 @@ def model_provider(pre_process=True, post_process=True) -> Union[GPTModel]:
     # print(f"{args.padded_vocab_size=}")
     # print(f"{args.extra_vocab_size=}")
     model_cls = OnlyMTPGPTModel if getattr(args, 'train_mtp_only', False) else GPTModel
-    model_cls_list = [GPTModel, LSTMDecodeModel, EnoughModel, ProjEnoughModel, OnlyGPTModel]
+    model_cls_list = [GPTModel, LSTMDecodeModel, EnoughModel, ProjEnoughModel, FMTPGPTModel]
     model_cls = model_cls_list[args.train_model_mode]
     with build_model_context(**build_model_context_args):
         model = model_cls(
