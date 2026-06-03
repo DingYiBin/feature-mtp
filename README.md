@@ -93,7 +93,7 @@ lm loss: 6.860194E-01 | mtp_1 loss: 9.684212E-01 | mtp_2 loss: 1.020181E+00 | mt
 
 ### some other problems
 
-1. scaling law：到目前为止的 scaling law 其实讨论的是 next-one-token 的 model 的 loss 和规模、数据量的关系。那么，next-n-tokens model 的 scaling law 是否会有改变？
-2. cost: 没有理由相信，n-tokens model 可以在同规模下达到 1-tokens model 的能力。那么当达到相近能力后，n-tokens model 是否真的能在推理上比有 mtp 支持的 1-tokens model 有更低的成本？
+1. scaling law：到目前为止的 scaling law 其实讨论的是 next-1-token model 的 loss 和规模、数据量的关系。那么，next-n-tokens model 的 scaling law 是否会有改变？
+2. cost: 没有理由相信，n-tokens model 可以在同规模下达到 next-1-token model 的能力。那么当达到相近能力后，next-n-tokens model 是否真的能在推理上比有 mtp 支持的 1-tokens model 有更低的成本？
 
 ## something useless
