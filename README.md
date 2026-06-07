@@ -92,9 +92,9 @@ OK，构想破产，之前巨大的loss差异的核心原因就是过小的 mtp 
 
 
 
-### how to use fmtp in inference
+## usage of predicting multi tokens in one step
 
-从训练 loss 可以看到，fmtp 逐 position 的 loss 不断上升，一般而言，可以认为，只相信 pos 0 的推理的结果的模型表现的能力，会比直接相信 pos 0、1 的推理的结果的模型有更高的能力。以此类推，我们实际上得到了一个能力逐步下降的 n 个模型（n 为训练时使用的 mtp 层数）：
+完全可以猜测，一个最后可信的一次多 token 推理的方案的 loss，逐 position 不断上升，一般而言，可以认为，只相信 pos 0 的推理的结果的模型表现的能力，会比直接相信 pos 0、1 的推理的结果的模型有更高的能力。以此类推，我们实际上得到了一个能力逐步下降的 n 个模型（n 为训练时所校正的后续 token 数量）：
 1. model 0 : only believe pos 0
 2. model 1 : believe pos 0 / 1
 3. ...
@@ -103,9 +103,5 @@ OK，构想破产，之前巨大的loss差异的核心原因就是过小的 mtp 
 
 对于model i，剩下的 (n - 1 - i) 个 token 可以作为这个模型的 draft token。这就意味着，一个推理服务，可以同时支持 n 个级别的模型服务！而且，我们可以随时切换使用的推理质量的级别。
 
-### some other problems
-
-1. scaling law：到目前为止的 scaling law 其实讨论的是 next-1-token model 的 loss 和规模、数据量的关系。那么，next-n-tokens model 的 scaling law 是否会有改变？对于一个规模的模型，训练时同时拟合多少个token，可以不损害 model 0 的能力？
-2. cost: 没有理由相信，n-tokens model 可以在同规模下达到 next-1-token model 的能力。那么当达到相近能力后，next-n-tokens model 是否真的能在推理上比有 mtp 支持的 1-tokens model 有更低的成本？
 
 ## something useless
