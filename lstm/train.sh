@@ -146,12 +146,11 @@ TRAINING_ARGS=(
     --convert-checkpoint
 )
 
-# if [ $TRAIN_MODEL_MODE = 1 ]; then
-#     TRAINING_ARGS+=(
-#         --main-model-checkpoint /public/converted-ckpt/Qwen3-4B-Instruct-2507-tp2/release
-#         --main-model-checkpoint-dtype torch
-#     )
-# fi
+if [ $TRAIN_MODEL_MODE = 0 ]; then
+    TRAINING_ARGS+=(
+        --mtp-loss-scaling-factor $NUM_MTP_LAYERS
+    )
+fi
 
 DATA_ARGS=(
     --data-path $DATA_PATH 
